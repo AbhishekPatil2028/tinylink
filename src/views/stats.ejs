@@ -1,0 +1,47 @@
+<%- include("layout", {
+  title: `Stats for ${link.code}`,
+  body: `
+
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <h3 class="fw-bold mb-3">Analytics for <span class="text-primary">${link.code}</span></h3>
+
+    <ul class="list-group">
+
+      <li class="list-group-item">
+        <strong>Short URL:</strong>
+        <a href="${BASE_URL}/${link.code}" target="_blank">
+          ${BASE_URL}/${link.code}
+        </a>
+      </li>
+
+      <li class="list-group-item">
+        <strong>Target URL:</strong>
+        <span class="d-block text-break">${link.target_url}</span>
+      </li>
+
+      <li class="list-group-item">
+        <strong>Total Clicks:</strong>
+        ${link.total_clicks}
+      </li>
+
+      <li class="list-group-item">
+        <strong>Last Clicked:</strong>
+        ${link.last_clicked_at ? new Date(link.last_clicked_at).toLocaleString() : "Never"}
+      </li>
+
+      <li class="list-group-item">
+        <strong>Created At:</strong>
+        ${new Date(link.created_at).toLocaleString()}
+      </li>
+
+    </ul>
+
+    <a href="/" class="btn btn-primary mt-4">← Back to Dashboard</a>
+
+  </div>
+</div>
+
+  `
+}) %>

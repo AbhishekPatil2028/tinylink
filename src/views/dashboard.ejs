@@ -1,0 +1,142 @@
+<%- include("layout", {
+  title: "Dashboard",
+  body: `
+  
+<div class="row">
+  <div class="col-md-6 mx-auto">
+
+    <!-- Create Link Card -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h4 class="card-title mb-3">Create Short Link</h4>
+
+        <form id="createForm">
+          <div class="mb-3">
+            <label class="form-label">Long URL</label>
+            <input type="text" id="url" class="form-control" placeholder="https://example.com/page" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Custom Code (optional)</label>
+            <input type="text" id="code" class="form-control" placeholder="6-8 alphanumeric" />
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            Create Short Link
+          </button>
+        </form>
+
+        <!-- Error Message -->
+        <div id="errorMsg" class="alert alert-danger mt-3 d-none"></div>
+
+        <!-- Success Message -->
+        <div id="successBox" class="alert alert-success mt-3 d-none">
+          <span id="successText"></span>
+          <button class="btn btn-sm btn-outline-dark float-end" id="copySuccess">Copy</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Links Table -->
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h4 class="mb-3">Your Links</h4>
+
+    ${links.length === 0 ? `
+        <p class="text-muted text-center">No links yet. Create your first short link above!</p>
+    ` : `
+
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Short URL</th>
+          <th>Target URL</th>
+          <th>Clicks</th>
+          <th>Last Clicked</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${links.map(link => `
+          <tr>
+            <td class="fw-bold">
+              <a href="/code/${link.code}" class="text-decoration-none">
+                ${link.code}
+              </a>
+            </td>
+
+            <td>
+              <span class="short-url">${BASE_URL}/${link.code}</span>
+              <button class="btn btn-sm btn-outline-secondary copy-btn" data-url="${BASE_URL}/${link.code}">
+                Copy
+              </button>
+            </td>
+
+            <td>
+              <span class="text-truncate d-inline-block" style="max-width:180px;">
+                ${link.target_url}
+              </span>
+            </td>
+
+            <td>${link.total_clicks}</td>
+
+            <td>
+              ${link.last_clicked_at ? new Date(link.last_clicked_at).toLocaleString() : "Never"}
+            </td>
+
+            <td>
+              <button data-code="${link.code}" class="btn btn-danger btn-sm delete-btn">
+                Delete
+              </button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+
+    `}
+  </div>
+</div>
+
+<script>
+document.querySelector("#createForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const url = document.querySelector("#url").value.trim();
+  const code = document.querySelector("#code").value.trim();
+  const errorBox = document.querySelector("#errorMsg");
+  const successBox = document.querySelector("#successBox");
+
+  errorBox.classList.add("d-none");
+  successBox.classList.add("d-none");
+
+  const response = await fetch("/api/links", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, code })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    errorBox.innerText = data.error;
+    errorBox.classList.remove("d-none");
+    return;
+  }
+
+  document.querySelector("#successText").innerText = data.short_url;
+  successBox.classList.remove("d-none");
+
+  document.querySelector("#copySuccess").onclick = () => {
+    navigator.clipboard.writeText(data.short_url);
+  };
+});
+</script>
+
+  `
+}) %>
